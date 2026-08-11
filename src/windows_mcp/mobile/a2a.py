@@ -5,6 +5,7 @@ import json
 
 from windows_mcp.mobile.agent import AgentRunOutput, InstructionAgent
 from windows_mcp.mobile.dag import DAGExecutor, build_simple_graph
+from windows_mcp.mobile.planner import HybridPlanner
 from windows_mcp.mobile.schemas import ExecutionTrace, SkillResult, TaskGraph
 from windows_mcp.mobile.skills import SkillContext, SkillRegistry
 from windows_mcp.mobile.tools import DesktopAutomationTools
@@ -170,4 +171,19 @@ class DesktopA2AOrchestrator:
         Each entry: {"skill": "open_or_focus_app", "params": {"app_name": "Chrome"}}
         """
         graph = build_simple_graph(skills)
+        return self.run_graph_sync(graph, should_stop)
+
+    def run_instruction_smart(
+        self,
+        instruction: str,
+        model: str | None = None,
+        should_stop: Callable[[], bool] | None = None,
+    ) -> ExecutionTrace:
+        """LLM-powered planning → DAG execution.
+
+        Uses HybridPlanner (LLM with keyword fallback) to decompose the
+        instruction into a TaskGraph, then executes it through the DAG.
+        """
+        planner = HybridPlanner(self.planner.skill_registry)
+        graph = planner.plan(instruction)
         return self.run_graph_sync(graph, should_stop)
