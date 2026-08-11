@@ -1,0 +1,24 @@
+version = 1
+
+[[skills]]
+name = "open_or_focus_app"
+enabled = true
+description = "Open an application or focus an existing window with a direct desktop action."
+examples = ["打开QQ", "启动微信", "切换到浏览器", "focus VS Code"]
+triggers = ["打开", "启动", "运行", "切换到", "focus", "switch to"]
+settings = { open_wait_seconds = 2, focus_wait_seconds = 1 }
+
+[[skills]]
+name = "capture_desktop_state"
+enabled = true
+description = "Capture the current desktop state and return a screenshot without extra actions."
+examples = ["截个图", "看下当前界面", "当前桌面状态", "capture current desktop"]
+triggers = ["截图", "当前界面", "桌面状态", "screen", "capture"]
+
+[[skills]]
+name = "browser_search"
+enabled = true
+description = "Use a browser-focused workflow to search the web and stop when results are visible."
+examples = ["搜索今天的 AI 新闻", "帮我查一下 SDU 官网", "search for Python asyncio guide"]
+triggers = ["搜索", "查一下", "search", "look up"]
+settings = { prompt_prefix = "Use a browser-first workflow. Focus an existing browser if available, otherwise open one. Search for the user's target and stop when the relevant results page is visible." }
