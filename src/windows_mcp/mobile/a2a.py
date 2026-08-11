@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from typing import Callable
+import asyncio
 import json
 
 from windows_mcp.mobile.agent import AgentRunOutput, InstructionAgent
-from windows_mcp.mobile.schemas import SkillResult
+from windows_mcp.mobile.dag import DAGExecutor, build_simple_graph
+from windows_mcp.mobile.schemas import ExecutionTrace, SkillResult, TaskGraph
 from windows_mcp.mobile.skills import SkillContext, SkillRegistry
 from windows_mcp.mobile.tools import DesktopAutomationTools
 
@@ -116,6 +118,11 @@ class DesktopA2AOrchestrator:
             fallback_agent=fallback_agent,
         )
         self.validator = ValidationAgent(tools)
+        self._dag_executor = DAGExecutor(
+            skill_registry=skill_registry,
+            tools=tools,
+            fallback_agent=fallback_agent,
+        )
 
     def run_instruction(
         self,
@@ -131,3 +138,36 @@ class DesktopA2AOrchestrator:
             should_stop=should_stop,
         )
         return self.validator.validate(decision, result)
+
+    async def run_graph(
+        self,
+        graph: TaskGraph,
+        should_stop: Callable[[], bool] | None = None,
+    ) -> ExecutionTrace:
+        """Execute a multi-step task graph through the DAG executor."""
+        self._dag_executor = DAGExecutor(
+            skill_registry=self.planner.skill_registry,
+            tools=self.executor.tools,
+            fallback_agent=self.executor.fallback_agent,
+        )
+        return await self._dag_executor.execute(graph)
+
+    def run_graph_sync(
+        self,
+        graph: TaskGraph,
+        should_stop: Callable[[], bool] | None = None,
+    ) -> ExecutionTrace:
+        """Synchronous wrapper for run_graph."""
+        return asyncio.run(self.run_graph(graph, should_stop))
+
+    def run_sequential(
+        self,
+        skills: list[dict],
+        should_stop: Callable[[], bool] | None = None,
+    ) -> ExecutionTrace:
+        """Run a list of skills sequentially as a DAG.
+
+        Each entry: {"skill": "open_or_focus_app", "params": {"app_name": "Chrome"}}
+        """
+        graph = build_simple_graph(skills)
+        return self.run_graph_sync(graph, should_stop)

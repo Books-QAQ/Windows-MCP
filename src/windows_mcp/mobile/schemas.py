@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class TaskStatus(str, Enum):
@@ -67,3 +67,50 @@ class SkillResult(BaseModel):
     message: str = ""
     screenshot: ScreenshotPayload | None = None
     error: str | None = None
+
+
+class TaskNode(BaseModel):
+    """A single node in a task DAG."""
+
+    id: str = Field(description="Unique node identifier")
+    skill: str = Field(description="Skill name or 'llm_fallback'")
+    params: dict = Field(default_factory=dict, description="Resolved parameters for the skill")
+    depends_on: list[str] = Field(default_factory=list, description="Node IDs this node depends on")
+    on_failure: str = Field(default="abort", description="Failure strategy: skip, retry, abort, fallback")
+    retry_count: int = Field(default=2, ge=0, le=5, description="Max retries when on_failure=retry")
+    timeout_seconds: int = Field(default=30, ge=1, le=300, description="Max execution time per attempt")
+
+    @field_validator("on_failure")
+    @classmethod
+    def validate_on_failure(cls, v: str) -> str:
+        allowed = {"skip", "retry", "abort", "fallback"}
+        if v not in allowed:
+            raise ValueError(f"on_failure must be one of {allowed}, got '{v}'")
+        return v
+
+
+class TaskGraph(BaseModel):
+    """A directed acyclic graph of task nodes."""
+
+    nodes: list[TaskNode] = Field(description="All nodes in the graph")
+    global_context: dict = Field(default_factory=dict, description="Initial shared context")
+
+
+class NodeTrace(BaseModel):
+    """Execution trace for a single node."""
+
+    node_id: str
+    skill: str
+    success: bool
+    result: SkillResult | None = None
+    attempts: int = 0
+    error: str | None = None
+    duration_ms: float = 0
+
+
+class ExecutionTrace(BaseModel):
+    """Complete execution trace for a task graph."""
+
+    nodes: list[NodeTrace] = Field(default_factory=list)
+    final_context: dict = Field(default_factory=dict)
+    overall_success: bool = False
