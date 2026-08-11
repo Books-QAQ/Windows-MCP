@@ -8,12 +8,29 @@ examples = ["打开QQ", "启动微信", "切换到浏览器", "focus VS Code"]
 triggers = ["打开", "启动", "运行", "切换到", "focus", "switch to"]
 settings = { open_wait_seconds = 2, focus_wait_seconds = 1 }
 
+[skills.input_schema]
+type = "object"
+properties = { app_name = { type = "string", description = "Name of the application to open or focus" } }
+required = ["app_name"]
+
+[skills.output_schema]
+type = "object"
+properties = { app_name = { type = "string" }, action = { type = "string", enum = ["opened", "focused"] }, raw_output = { type = "string" } }
+
 [[skills]]
 name = "capture_desktop_state"
 enabled = true
 description = "Capture the current desktop state and return a screenshot without extra actions."
 examples = ["截个图", "看下当前界面", "当前桌面状态", "capture current desktop"]
 triggers = ["截图", "当前界面", "桌面状态", "screen", "capture"]
+
+[skills.input_schema]
+type = "object"
+properties = {}
+
+[skills.output_schema]
+type = "object"
+properties = { captured = { type = "boolean" } }
 
 [[skills]]
 name = "browser_search"
@@ -22,3 +39,43 @@ description = "Use a browser-focused workflow to search the web and stop when re
 examples = ["搜索今天的 AI 新闻", "帮我查一下 SDU 官网", "search for Python asyncio guide"]
 triggers = ["搜索", "查一下", "search", "look up"]
 settings = { prompt_prefix = "Use a browser-first workflow. Focus an existing browser if available, otherwise open one. Search for the user's target and stop when the relevant results page is visible." }
+
+[skills.input_schema]
+type = "object"
+properties = { query = { type = "string", description = "The search query to execute" } }
+required = ["query"]
+
+[skills.output_schema]
+type = "object"
+properties = { search_query = { type = "string" }, agent_response = { type = "string" } }
+
+[[skills]]
+name = "file_operation"
+enabled = true
+description = "Read, write, list, or search files on the local file system."
+examples = ["读取 C:/test.txt", "列出桌面文件", "写入hello到D:/output.txt"]
+triggers = ["读取", "列出", "写入", "保存", "read", "list", "write"]
+
+[skills.input_schema]
+type = "object"
+properties = { path = { type = "string", description = "File or directory path" }, content = { type = "string", description = "Content to write (for write operations)" } }
+required = ["path"]
+
+[skills.output_schema]
+type = "object"
+properties = { path = { type = "string" }, action = { type = "string", enum = ["read", "list", "write"] }, size = { type = "integer" } }
+
+[[skills]]
+name = "clipboard_operation"
+enabled = true
+description = "Read the current clipboard content or write text to the clipboard."
+examples = ["获取剪贴板内容", "复制hello到剪贴板", "查看剪贴板"]
+triggers = ["剪贴板", "clipboard", "复制", "粘贴"]
+
+[skills.input_schema]
+type = "object"
+properties = { text = { type = "string", description = "Text to write to clipboard (for set operations)" } }
+
+[skills.output_schema]
+type = "object"
+properties = { action = { type = "string", enum = ["get", "set"] }, text = { type = "string" } }

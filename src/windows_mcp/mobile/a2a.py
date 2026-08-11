@@ -3,6 +3,7 @@ from typing import Callable
 import json
 
 from windows_mcp.mobile.agent import AgentRunOutput, InstructionAgent
+from windows_mcp.mobile.schemas import SkillResult
 from windows_mcp.mobile.skills import SkillContext, SkillRegistry
 from windows_mcp.mobile.tools import DesktopAutomationTools
 
@@ -67,9 +68,18 @@ class ExecutionAgent:
                 model=model,
                 should_stop=should_stop,
             )
-            return skill.execute(context)
+            skill_result = skill.execute(context)
+            return self._skill_result_to_agent_output(skill_result)
 
         return self.fallback_agent.run_instruction(instruction, model, should_stop)
+
+    @staticmethod
+    def _skill_result_to_agent_output(result: SkillResult) -> AgentRunOutput:
+        return AgentRunOutput(
+            message=result.message,
+            screenshot=result.screenshot,
+            raw_agent_response=json.dumps(result.data, ensure_ascii=False) if result.data else None,
+        )
 
 
 class ValidationAgent:

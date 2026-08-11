@@ -51,3 +51,19 @@ class SkillView(BaseModel):
     description: str
     examples: list[str] = []
     triggers: list[str] = []
+    input_schema: dict = {}
+    output_schema: dict = {}
+
+
+class SkillResult(BaseModel):
+    """Structured result returned by a skill after execution.
+
+    Carries typed data that downstream nodes can consume, plus a human-readable
+    message and optional screenshot for the mobile-facing UI.
+    """
+
+    success: bool
+    data: dict = {}
+    message: str = ""
+    screenshot: ScreenshotPayload | None = None
+    error: str | None = None
