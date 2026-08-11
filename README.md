@@ -1,8 +1,8 @@
 <div align="center">
   <h1>🪟 Windows-MCP</h1>
 
-  <a href="https://github.com/Books-QAQ/Windows-MCP/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License">
+  <a href="https://github.com/Books-QAQ/Windows-MCP">
+    <img src="https://img.shields.io/badge/Windows%20MCP-v0.7.1-blue?style=flat-square" alt="Version">
   </a>
   <img src="https://img.shields.io/badge/python-3.13+-blue?style=flat-square&logo=python" alt="Python">
   <img src="https://img.shields.io/badge/platform-Windows%2010%2F11-blue?style=flat-square&logo=windows" alt="Platform">
@@ -20,11 +20,11 @@
 - **任意 LLM 驱动** — 不依赖计算机视觉或微调模型，兼容任何 LLM 提供商。
 - **17 个 MCP 工具** — Click、Type、Scroll、Move、Shortcut、Screenshot、Snapshot、App、Shell、Scrape、MultiSelect、MultiEdit、Clipboard、Process、Notification、Registry、Wait。
 - **A2A 编排框架** — LLM 任务规划、DAG 并行执行、结构化技能输出、多 Agent 协作委托。
-- **轻量开源** — 最少依赖，MIT 协议。
+- **轻量开源** — 最少依赖。
 
 ## 🧠 A2A 框架
 
-在原项目基础上增加了一整套 Agent-to-Agent 编排层：
+Agent-to-Agent 编排层：
 
 | 组件 | 说明 |
 |------|------|
@@ -200,8 +200,3 @@ uvx windows-mcp --transport streamable-http --host localhost --port 8000
 - 无法选中段落中的特定文本（依赖无障碍树）。
 - `Type` 工具适用于文本输入，不适合 IDE 编程场景。
 - 不适用于游戏自动化。
-
-## 🪪 开源协议
-
-MIT License — 详见 [LICENSE](LICENSE)。
-
