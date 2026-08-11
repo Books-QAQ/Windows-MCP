@@ -7,6 +7,7 @@ independent nodes, shared context passing, and configurable failure recovery.
 from dataclasses import dataclass, field
 from typing import Any, Callable
 import asyncio
+import logging
 import time
 
 from windows_mcp.mobile.agent import AgentRunOutput
@@ -19,6 +20,9 @@ from windows_mcp.mobile.schemas import (
 )
 from windows_mcp.mobile.skills import DesktopSkill, SkillContext, SkillRegistry
 from windows_mcp.mobile.tools import DesktopAutomationTools
+from windows_mcp.mobile.validator import SmartValidator, ValidationResult
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -66,10 +70,12 @@ class DAGExecutor:
         skill_registry: SkillRegistry,
         tools: DesktopAutomationTools,
         fallback_agent: Callable[..., AgentRunOutput] | None = None,
+        validator: SmartValidator | None = None,
     ) -> None:
         self.skill_registry = skill_registry
         self.tools = tools
         self.fallback_agent = fallback_agent
+        self.validator = validator
 
     async def execute(self, graph: TaskGraph) -> ExecutionTrace:
         """Execute all nodes in the graph and return a trace."""
@@ -134,6 +140,38 @@ class DAGExecutor:
             for node, trace in zip(ready_nodes, batch_traces):
                 traces[node.id] = trace
                 if trace.success:
+                    # Run validation if available
+                    if self.validator and trace.result:
+                        validation = self.validator.validate(
+                            skill_name=node.skill,
+                            result=trace.result,
+                        )
+                        if not validation.success:
+                            logger.warning(
+                                "Validation failed for node %s: %s. Confidence=%.2f, action=%s",
+                                node.id, validation.reason,
+                                validation.confidence, validation.suggested_action,
+                            )
+                            if validation.suggested_action == "retry" and trace.attempts < node.retry_count:
+                                # Mark for retry — don't add to completed
+                                retry_trace = await self._execute_node_with_timeout(
+                                    node, context, nodes_by_id
+                                )
+                                traces[node.id] = retry_trace
+                                if retry_trace.success:
+                                    completed.add(node.id)
+                                    if retry_trace.result:
+                                        context.node_results[node.id] = retry_trace.result
+                                else:
+                                    # Retry failed, follow on_failure
+                                    if node.on_failure == "skip":
+                                        completed.add(node.id)
+                                    elif node.on_failure == "abort":
+                                        aborted = True
+                                continue
+                            elif validation.suggested_action in ("abort", "replan"):
+                                aborted = True
+                            # "skip" or "proceed" after validation failure: accept it
                     completed.add(node.id)
                     if trace.result:
                         context.node_results[node.id] = trace.result
