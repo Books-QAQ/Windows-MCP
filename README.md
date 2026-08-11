@@ -2,71 +2,73 @@
   <h1>🪟 Windows-MCP</h1>
 
   <a href="https://github.com/Books-QAQ/Windows-MCP/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
+    <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License">
   </a>
-  <img src="https://img.shields.io/badge/python-3.13%2B-blue" alt="Python">
-  <img src="https://img.shields.io/badge/platform-Windows%207–11-blue" alt="Platform: Windows 7 to 11">
+  <img src="https://img.shields.io/badge/python-3.13+-blue?style=flat-square&logo=python" alt="Python">
+  <img src="https://img.shields.io/badge/platform-Windows%2010%2F11-blue?style=flat-square&logo=windows" alt="Platform">
+  <img src="https://img.shields.io/badge/tests-313%20passed-brightgreen?style=flat-square" alt="Tests">
+  <img src="https://img.shields.io/badge/A2A-5%20phases-orange?style=flat-square" alt="A2A">
 </div>
 
 <br>
 
-**Windows-MCP** is a lightweight, open-source MCP server that bridges AI agents with the Windows operating system, enabling tasks such as **file navigation, application control, UI interaction, QA testing,** and more.
+**Windows-MCP** 是一个轻量级开源 MCP 服务器，桥接 AI Agent 与 Windows 操作系统，支持**文件操作、应用控制、UI 交互、自动化测试**等任务。
 
-> This is a fork of [CursorTouch/Windows-MCP](https://github.com/CursorTouch/Windows-MCP) with significant enhancements to the A2A (Agent-to-Agent) framework.
+> 基于 [CursorTouch/Windows-MCP](https://github.com/CursorTouch/Windows-MCP) 二次开发，对 A2A（Agent-to-Agent）框架进行了大幅增强。
 
-## ✨ Key Features
+## ✨ 核心特性
 
-- **Seamless Windows Integration** — Interacts natively with Windows UI elements, opens apps, controls windows, simulates user input.
-- **Use Any LLM (Vision Optional)** — No dependency on computer vision techniques or fine-tuned models. Works with any LLM provider.
-- **Rich Toolset** — 17 tools: Click, Type, Scroll, Move, Shortcut, Screenshot, Snapshot, App, Shell, Scrape, MultiSelect, MultiEdit, Clipboard, Process, Notification, Registry, Wait.
-- **A2A Framework** — LLM-powered task planning, DAG execution with parallel batches, structured skill outputs, and multi-agent delegation.
-- **Lightweight & Open-Source** — Minimal dependencies, MIT license.
+- **无缝 Windows 集成** — 原生操控 Windows UI 元素、启动应用、控制窗口、模拟用户输入。
+- **任意 LLM 驱动** — 不依赖计算机视觉或微调模型，兼容任何 LLM 提供商。
+- **17 个 MCP 工具** — Click、Type、Scroll、Move、Shortcut、Screenshot、Snapshot、App、Shell、Scrape、MultiSelect、MultiEdit、Clipboard、Process、Notification、Registry、Wait。
+- **A2A 编排框架** — LLM 任务规划、DAG 并行执行、结构化技能输出、多 Agent 协作委托。
+- **轻量开源** — 最少依赖，MIT 协议。
 
-## 🧠 A2A Framework (New)
+## 🧠 A2A 框架（新增）
 
-This fork adds a complete Agent-to-Agent orchestration layer on top of the existing MCP tools:
+在原项目基础上新增了一整套 Agent-to-Agent 编排层：
 
-| Component | Description |
-|-----------|-------------|
-| **Skill System** | 5 built-in skills (open_app, screenshot, search, file_ops, clipboard) with pluggable architecture and JSON Schema I/O |
-| **DAG Executor** | Topological ordering, parallel batch execution, cross-node context passing (`$step_id.field`) |
-| **LLM Planner** | Converts natural language to `TaskGraph` JSON via OpenAI-compatible APIs, falls back to keyword matching |
-| **Smart Validator** | Two-layer verification: rule-based checks (process/file/clipboard) + optional vision model |
-| **A2A Network** | `AgentCard` discovery, `AgentRegistry`, remote task delegation via FastAPI gateway |
+| 组件 | 说明 |
+|------|------|
+| **技能系统** | 5 个内置技能（打开应用、截图、搜索、文件操作、剪贴板），插件化架构 + JSON Schema 约束 |
+| **DAG 执行器** | 拓扑排序、同层并行执行、跨节点上下文传递（`$step_id.field`） |
+| **LLM 规划器** | 自然语言 → `TaskGraph` JSON，支持 OpenAI 兼容 API，自动降级关键词匹配 |
+| **智能验证器** | 两层校验：规则检查（进程/文件/剪贴板）+ 可选视觉模型对比 |
+| **A2A 网络** | `AgentCard` 能力发现、`AgentRegistry` 注册中心、FastAPI 远程任务委托 |
 
-### Usage
+### 使用示例
 
 ```python
 from windows_mcp.mobile.runtime import create_mobile_runtime
 
 agent, skills = create_mobile_runtime()
 
-# Simple instruction (keyword match)
+# 简单指令（关键词匹配）
 agent.run_instruction("打开QQ")
 
-# DAG sequential chain
+# DAG 顺序链
 agent.run_sequential([
     {"skill": "open_or_focus_app", "params": {"instruction": "打开Chrome"}},
     {"skill": "capture_desktop_state"},
 ])
 
-# LLM-powered planning (requires PLANNER_API_KEY env var)
+# LLM 智能规划（需配置 PLANNER_API_KEY 环境变量）
 agent.run_instruction_smart("打开浏览器搜索Python教程然后截图保存")
 ```
 
-## 🛠️ Installation
+## 🛠️ 安装
 
-> First-time install may take 1–2 minutes for dependency resolution.
+> 首次安装依赖解析约需 1–2 分钟。
 
-### Prerequisites
+### 环境要求
 
 - Python 3.13+
-- [UV](https://docs.astral.sh/uv/) package manager
+- [UV](https://docs.astral.sh/uv/) 包管理器
 
 <details>
   <summary>Claude Desktop</summary>
 
-**Option A: PyPI (Recommended)**
+**方式 A：PyPI 安装（推荐）**
 ```json
 {
   "mcpServers": {
@@ -78,7 +80,7 @@ agent.run_instruction_smart("打开浏览器搜索Python教程然后截图保存
 }
 ```
 
-**Option B: From Source**
+**方式 B：源码安装**
 ```shell
 git clone https://github.com/Books-QAQ/Windows-MCP.git
 cd Windows-MCP
@@ -88,13 +90,13 @@ cd Windows-MCP
   "mcpServers": {
     "windows-mcp": {
       "command": "uv",
-      "args": ["--directory", "<path>", "run", "windows-mcp"]
+      "args": ["--directory", "<项目路径>", "run", "windows-mcp"]
     }
   }
 }
 ```
 
-**MSIX (Windows Store)**: Config lives at `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\`. Use full path to `uv.exe` if Electron doesn't inherit PATH.
+**MSIX 版本（Windows Store）**：配置文件位于 `%LOCALAPPDATA%\Packages\Claude_pzs8sxrjxfjjc\LocalCache\Roaming\Claude\`。如 Electron 未继承 PATH，请使用 `uv.exe` 的完整绝对路径。
 </details>
 
 <details>
@@ -104,14 +106,14 @@ cd Windows-MCP
 # PyPI
 claude mcp add --transport stdio windows-mcp -- uvx windows-mcp
 
-# From source
+# 源码
 git clone https://github.com/Books-QAQ/Windows-MCP.git
-claude mcp add --transport stdio windows-mcp -- uv --directory "<path>" run windows-mcp
+claude mcp add --transport stdio windows-mcp -- uv --directory "<路径>" run windows-mcp
 ```
 </details>
 
 <details>
-  <summary>Other Clients (Perplexity / Gemini / Qwen / Codex)</summary>
+  <summary>其他客户端（Perplexity / Gemini / Qwen / Codex）</summary>
 
 ```json
 {
@@ -124,108 +126,106 @@ claude mcp add --transport stdio windows-mcp -- uv --directory "<path>" run wind
 }
 ```
 
-From source: replace `"command": "uvx"` with `"command": "uv"` and `"args": ["--directory", "<path>", "run", "windows-mcp"]`.
+源码安装：将 `"command": "uvx"` 替换为 `"command": "uv"`，`"args": ["--directory", "<路径>", "run", "windows-mcp"]`。
 </details>
 
-## 🖥️ Modes
+## 🖥️ 运行模式
 
-### Local Mode (Default)
+### 本地模式（默认）
 
 ```shell
-uvx windows-mcp                           # stdio (default)
+uvx windows-mcp                           # stdio（默认）
 uvx windows-mcp --transport sse --host localhost --port 8000
 uvx windows-mcp --transport streamable-http --host localhost --port 8000
 ```
 
-### Remote Mode
+### 远程模式
 
-> Requires an account at [windowsmcp.io](https://windowsmcp.io).
+> 需要在 [windowsmcp.io](https://windowsmcp.io) 注册账号。
 
-Set environment variables:
+环境变量配置：
 - `MODE=remote`
-- `SANDBOX_ID=<your-sandbox-id>`
-- `API_KEY=<your-api-key>`
+- `SANDBOX_ID=<沙箱ID>`
+- `API_KEY=<API密钥>`
 
-## ⚙️ Environment Variables
+## ⚙️ 环境变量
 
-### A2A Planner & Validator (New)
+### A2A 规划器与验证器（新增）
 
-| Variable | Default | Description |
+| 变量 | 默认值 | 说明 |
 |---|---|---|
-| `PLANNER_API_KEY` | _(none)_ | API key for LLM-based task planning |
-| `PLANNER_BASE_URL` | `https://api.deepseek.com/v1` | LLM API endpoint |
-| `PLANNER_MODEL` | `deepseek-chat` | Model name for planning |
-| `VALIDATOR_API_KEY` | _(none)_ | API key for vision-based validation |
-| `VALIDATOR_MODEL` | `deepseek-chat` | Model for vision validation |
+| `PLANNER_API_KEY` | 无 | LLM 任务规划的 API Key |
+| `PLANNER_BASE_URL` | `https://api.deepseek.com/v1` | LLM API 地址 |
+| `PLANNER_MODEL` | `deepseek-chat` | 规划模型名称 |
+| `VALIDATOR_API_KEY` | 无 | 视觉验证的 API Key |
+| `VALIDATOR_MODEL` | `deepseek-chat` | 视觉验证模型 |
 
-### Screenshot & Snapshot
+### 截图与快照
 
-| Variable | Default | Description |
+| 变量 | 默认值 | 说明 |
 |---|---|---|
-| `WINDOWS_MCP_SCREENSHOT_SCALE` | `1.0` | Scale factor (0.1–1.0). Use `0.5` for 4K displays to stay under 1MB limit. |
-| `WINDOWS_MCP_SCREENSHOT_BACKEND` | `auto` | `auto` / `dxcam` / `mss` / `pillow` |
-| `WINDOWS_MCP_PROFILE_SNAPSHOT` | _(disabled)_ | Set to `1`/`true` to emit timing logs |
+| `WINDOWS_MCP_SCREENSHOT_SCALE` | `1.0` | 缩放比例（0.1–1.0），4K 屏建议 `0.5` 以避免超过 1MB 限制 |
+| `WINDOWS_MCP_SCREENSHOT_BACKEND` | `auto` | 截图后端：`auto` / `dxcam` / `mss` / `pillow` |
+| `WINDOWS_MCP_PROFILE_SNAPSHOT` | 关闭 | 设为 `1`/`true` 启用性能计时日志 |
 
-### Telemetry & Debug
+### 遥测与调试
 
-| Variable | Default | Description |
+| 变量 | 默认值 | 说明 |
 |---|---|---|
-| `ANONYMIZED_TELEMETRY` | `true` | Set to `false` to disable |
-| `WINDOWS_MCP_DEBUG` | `false` | Set to `1`/`true` for verbose logging |
+| `ANONYMIZED_TELEMETRY` | `true` | 设为 `false` 关闭匿名遥测 |
+| `WINDOWS_MCP_DEBUG` | `false` | 设为 `1`/`true` 启用调试日志 |
 
-## 🔨 MCP Tools
+## 🔨 MCP 工具列表
 
-- **Click** — Click at coordinates or UI element label
-- **Type** — Type text with optional clear/press_enter
-- **Scroll** — Vertical/horizontal scrolling
-- **Move** — Move mouse or drag-and-drop
-- **Shortcut** — Keyboard shortcuts (`Ctrl+C`, `Alt+Tab`, etc.)
-- **Wait** — Pause for specified duration
-- **Screenshot** — Fast screenshot with cursor/window info
-- **Snapshot** — Full desktop state with interactive elements, DOM extraction
-- **App** — Launch, resize, switch applications
-- **Shell** — Execute PowerShell commands
-- **Scrape** — Extract webpage content
-- **MultiSelect** — Select multiple items with optional Ctrl
-- **MultiEdit** — Type into multiple fields at once
-- **Clipboard** — Read/set Windows clipboard
-- **Process** — List or kill processes
-- **Notification** — Send Windows toast notifications
-- **Registry** — Read/write/delete/list Registry keys
+| 工具 | 功能 |
+|------|------|
+| **Click** | 按坐标或 UI 元素标签点击 |
+| **Type** | 输入文本，支持清空/回车 |
+| **Scroll** | 垂直/水平滚动 |
+| **Move** | 移动鼠标或拖拽 |
+| **Shortcut** | 键盘快捷键（`Ctrl+C`、`Alt+Tab` 等） |
+| **Wait** | 等待指定时长 |
+| **Screenshot** | 快速截图，含光标和窗口信息 |
+| **Snapshot** | 完整桌面状态，含交互元素和 DOM 提取 |
+| **App** | 启动/缩放/切换应用 |
+| **Shell** | 执行 PowerShell 命令 |
+| **Scrape** | 抓取网页内容 |
+| **MultiSelect** | 多选文件/复选框 |
+| **MultiEdit** | 多字段同时输入 |
+| **Clipboard** | 读写剪贴板 |
+| **Process** | 列出或终止进程 |
+| **Notification** | 发送 Windows 通知 |
+| **Registry** | 读写注册表 |
 
-## 📊 Telemetry
+## 📝 已知限制
 
-Anonymous usage data is collected by default to help improve the server. No personal information, tool arguments, or outputs are tracked. Set `ANONYMIZED_TELEMETRY=false` to disable.
+- 无法选中段落中的特定文本（依赖无障碍树）。
+- `Type` 工具适用于文本输入，不适合 IDE 编程场景。
+- 不适用于游戏自动化。
 
-## 📝 Limitations
+## 🪪 开源协议
 
-- Cannot select specific text sections within a paragraph (relies on accessibility tree).
-- `Type` tool is designed for text input, not IDE programming.
-- Not suitable for video game automation.
+MIT License — 详见 [LICENSE](LICENSE)。
 
-## 🪪 License
+## 🙏 致谢
 
-MIT License — see [LICENSE](LICENSE).
-
-## 🙏 Acknowledgements
-
-Built on top of excellent open-source projects:
-- [CursorTouch/Windows-MCP](https://github.com/CursorTouch/Windows-MCP) — original project
+本项目基于以下优秀开源项目构建：
+- [CursorTouch/Windows-MCP](https://github.com/CursorTouch/Windows-MCP) — 原始项目
 - [Python-UIAutomation-for-Windows](https://github.com/yinkaisheng/Python-UIAutomation-for-Windows)
 - [PyAutoGUI](https://github.com/asweigart/pyautogui)
 
-## 🤝 Contributing
+## 🤝 参与贡献
 
-Contributions welcome! See [CONTRIBUTING](CONTRIBUTING).
+欢迎提交 PR！详见 [CONTRIBUTING](CONTRIBUTING)。
 
 Made with ❤️ by [Books-QAQ](https://github.com/Books-QAQ)
 
-## Citation
+## 引用
 
 ```bibtex
 @software{
   author       = {Books-QAQ},
-  title        = {Windows-MCP: Lightweight MCP server for Windows desktop automation},
+  title        = {Windows-MCP: 轻量级 Windows 桌面自动化 MCP 服务器},
   year         = {2024},
   publisher    = {GitHub},
   url          = {https://github.com/Books-QAQ/Windows-MCP}
