@@ -14,7 +14,7 @@
 
 **Windows-MCP** 是一个轻量级开源 MCP 服务器，桥接 AI Agent 与 Windows 操作系统，支持**文件操作、应用控制、UI 交互、自动化测试**等任务。
 
-> 基于 [CursorTouch/Windows-MCP](https://github.com/CursorTouch/Windows-MCP) 二次开发，对 A2A（Agent-to-Agent）框架进行了大幅增强。
+> 基于 [CursorTouch/Windows-MCP](https://github.com/CursorTouch/Windows-MCP) 二次开发。
 
 ## ✨ 核心特性
 
@@ -24,9 +24,9 @@
 - **A2A 编排框架** — LLM 任务规划、DAG 并行执行、结构化技能输出、多 Agent 协作委托。
 - **轻量开源** — 最少依赖，MIT 协议。
 
-## 🧠 A2A 框架（新增）
+## 🧠 A2A 框架
 
-在原项目基础上新增了一整套 Agent-to-Agent 编排层：
+在原项目基础上增加了一整套 Agent-to-Agent 编排层：
 
 | 组件 | 说明 |
 |------|------|
@@ -150,7 +150,7 @@ uvx windows-mcp --transport streamable-http --host localhost --port 8000
 
 ## ⚙️ 环境变量
 
-### A2A 规划器与验证器（新增）
+### A2A 规划器与验证器
 
 | 变量 | 默认值 | 说明 |
 |---|---|---|
@@ -207,27 +207,3 @@ uvx windows-mcp --transport streamable-http --host localhost --port 8000
 
 MIT License — 详见 [LICENSE](LICENSE)。
 
-## 🙏 致谢
-
-本项目基于以下优秀开源项目构建：
-- [CursorTouch/Windows-MCP](https://github.com/CursorTouch/Windows-MCP) — 原始项目
-- [Python-UIAutomation-for-Windows](https://github.com/yinkaisheng/Python-UIAutomation-for-Windows)
-- [PyAutoGUI](https://github.com/asweigart/pyautogui)
-
-## 🤝 参与贡献
-
-欢迎提交 PR！详见 [CONTRIBUTING](CONTRIBUTING)。
-
-Made with ❤️ by [Books-QAQ](https://github.com/Books-QAQ)
-
-## 引用
-
-```bibtex
-@software{
-  author       = {Books-QAQ},
-  title        = {Windows-MCP: 轻量级 Windows 桌面自动化 MCP 服务器},
-  year         = {2024},
-  publisher    = {GitHub},
-  url          = {https://github.com/Books-QAQ/Windows-MCP}
-}
-```
