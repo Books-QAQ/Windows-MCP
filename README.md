@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>🪟 Windows-MCP</h1>
+  <h1>Windows-MCP</h1>
 
   <a href="https://github.com/Books-QAQ/Windows-MCP">
     <img src="https://img.shields.io/badge/Windows%20MCP-v0.7.1-blue?style=flat-square" alt="Version">
