@@ -4,7 +4,7 @@ from windows_mcp.env import load_project_dotenv
 
 
 @click.command()
-@click.option("--host", default="127.0.0.1", show_default=True, help="Host to bind the mobile gateway.")
+@click.option("--host", default="0.0.0.0", show_default=True, help="Host to bind the mobile gateway.")
 @click.option("--port", default=8787, type=int, show_default=True, help="Port for the mobile gateway.")
 def main(host: str, port: int) -> None:
     """Run the mobile gateway service."""

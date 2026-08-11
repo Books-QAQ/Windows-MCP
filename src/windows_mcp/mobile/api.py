@@ -1,12 +1,93 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 
 from windows_mcp.env import load_project_dotenv
-from windows_mcp.mobile.runtime import default_skill_views
+from windows_mcp.mobile.agent import InstructionAgent
+from windows_mcp.mobile.auth import get_auth_token, verify_token, _extract_token
+from windows_mcp.mobile.runtime import create_mobile_runtime, default_skill_views
 from windows_mcp.mobile.schemas import CommandRequest, SkillView, TaskView
 from windows_mcp.mobile.service import MobileTaskService
+
+LOGIN_HTML = """<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Windows-MCP 登录</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      display: flex; justify-content: center; align-items: center; padding: 20px;
+    }
+    .card {
+      width: min(100%, 380px);
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      padding: 40px 32px;
+      text-align: center;
+      color: #fff;
+    }
+    .card h1 { font-size: 28px; margin-bottom: 8px; }
+    .card p { color: #8892b0; font-size: 14px; margin-bottom: 32px; }
+    .card input {
+      width: 100%; padding: 14px 18px; border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.08);
+      color: #fff; font-size: 15px; outline: none;
+      margin-bottom: 20px;
+    }
+    .card input::placeholder { color: #5a6a8a; }
+    .card button {
+      width: 100%; padding: 14px; border-radius: 14px;
+      border: none; background: #305aa8; color: #fff;
+      font-size: 16px; font-weight: 700; cursor: pointer;
+    }
+    .card .error { color: #e74c3c; font-size: 13px; margin-top: 12px; display: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🪟 Windows-MCP</h1>
+    <p>输入访问令牌以控制远程桌面</p>
+    <input id="token" type="password" placeholder="访问令牌" autofocus>
+    <button onclick="doLogin()">登 录</button>
+    <div class="error" id="error">令牌无效，请重试</div>
+  </div>
+  <script>
+    async function doLogin() {
+      const token = document.getElementById("token").value.trim();
+      if (!token) return;
+      try {
+        const resp = await fetch("/login", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({token}),
+        });
+        if (resp.ok) {
+          document.cookie = "auth_token=" + token + ";path=/;max-age=86400";
+          location.href = "/";
+        } else {
+          document.getElementById("error").style.display = "block";
+        }
+      } catch {
+        document.getElementById("error").style.display = "block";
+      }
+    }
+    document.getElementById("token").addEventListener("keydown", e => {
+      if (e.key === "Enter") doLogin();
+    });
+  </script>
+</body>
+</html>
+"""
+
 
 INDEX_HTML = """<!doctype html>
 <html lang="zh-CN">
@@ -338,33 +419,59 @@ def create_app(
     task_service: MobileTaskService | None = None,
     *,
     skill_catalog: list[SkillView] | None = None,
+    agent: InstructionAgent | None = None,
 ) -> FastAPI:
     load_project_dotenv()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        if task_service is not None:
-            app.state.task_service = task_service
-            app.state.skill_catalog = skill_catalog or default_skill_views()
-            yield
-            await app.state.task_service.close()
-            return
-
-        app.state.task_service = MobileTaskService()
+        nonlocal task_service, agent, skill_catalog
+        if task_service is None:
+            if agent is None:
+                agent, skill_catalog = create_mobile_runtime()
+            task_service = MobileTaskService(agent=agent)
+        app.state.task_service = task_service
         app.state.skill_catalog = skill_catalog or default_skill_views()
         yield
         await app.state.task_service.close()
 
     app = FastAPI(
         title="Windows-MCP Mobile Gateway",
-        description="Phone-to-desktop gateway that uses Claude to control Windows through Windows-MCP.",
-        version="0.1.0",
+        description="Remote desktop control via mobile web interface.",
+        version="1.0.0",
         lifespan=lifespan,
     )
+
+    # ── auth check middleware ──
+    _token = get_auth_token()
+
+    @app.middleware("http")
+    async def auth_middleware(request: Request, call_next):
+        # Allow healthcheck, login page, static assets without auth
+        if request.url.path in ("/healthz", "/login") or request.url.path.startswith("/assets"):
+            return await call_next(request)
+        if _token and not verify_token(_extract_token(request)):
+            if request.url.path == "/":
+                return RedirectResponse("/login")
+            return JSONResponse({"detail": "Unauthorized"}, status_code=401)
+        return await call_next(request)
 
     @app.get("/healthz")
     async def healthcheck() -> dict[str, str]:
         return {"status": "ok"}
+
+    @app.get("/login", response_class=HTMLResponse)
+    async def login_page() -> HTMLResponse:
+        return HTMLResponse(LOGIN_HTML)
+
+    @app.post("/login")
+    async def login(request: Request):
+        import json
+        body = await request.json()
+        token = body.get("token", "")
+        if verify_token(token):
+            return {"success": True, "token": token}
+        return JSONResponse({"detail": "Invalid token"}, status_code=401)
 
     @app.get("/", response_class=HTMLResponse)
     async def index() -> HTMLResponse:
@@ -397,3 +504,6 @@ def create_app(
         return list(app.state.skill_catalog)
 
     return app
+
+
+from fastapi.responses import RedirectResponse
