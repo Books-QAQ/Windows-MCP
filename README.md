@@ -14,8 +14,6 @@
 
 **Windows-MCP** 是一个轻量级开源 MCP 服务器，桥接 AI Agent 与 Windows 操作系统，支持**文件操作、应用控制、UI 交互、自动化测试**等任务。
 
-> 基于 [CursorTouch/Windows-MCP](https://github.com/CursorTouch/Windows-MCP) 二次开发。
-
 ## ✨ 核心特性
 
 - **无缝 Windows 集成** — 原生操控 Windows UI 元素、启动应用、控制窗口、模拟用户输入。

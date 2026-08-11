@@ -163,9 +163,6 @@ cython_debug/
 #.idea/
 
 .vscode
-.mcpregistry_github_token
-.mcpregistry_registry_token
 sandbox
 *.ipynb
-*.mcpb
 .idea/

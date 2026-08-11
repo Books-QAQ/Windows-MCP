@@ -6,12 +6,9 @@ authors = [
     { name = "Books-QAQ", email = "2895197998@qq.com" }
 ]
 readme = "README.md"
-license = { file = "LICENSE.md" }
 keywords = ["windows", "mcp", "ai", "desktop", "ai agent"]
 requires-python = ">=3.13"
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: Microsoft :: Windows :: Windows 10",
     "Operating System :: Microsoft :: Windows :: Windows 11",
     "Programming Language :: Python :: 3.13",
